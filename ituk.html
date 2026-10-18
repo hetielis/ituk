@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="et" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ood ITÜK-ile</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#000000',          // Clean pure black background
+                            card: '#0a0d14',
+                            border: '#1a2233',
+                            pink: '#c7245b',        // ITÜK dark pink / magenta
+                            pinkglow: '#f43f8e',    // Bright pink glow
+                            cyan: '#22d3ee',        // Terminal cyan
+                            text: '#f1f5f9',
+                            muted: '#818cf8'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a2233;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c7245b;
+        }
+        .glass-panel {
+            background: rgba(10, 13, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(26, 34, 51, 0.9);
+        }
+        #tux-svg {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: visible;
+        }
+        #tux-svg:hover {
+            transform: scale(1.05) rotate(1deg);
+        }
+        .speech-bubble {
+            position: relative;
+            background: #0a0d14;
+            border: 1px solid #c7245b;
+            border-radius: 1rem;
+            padding: 14px 20px;
+            box-shadow: 0 0 25px rgba(199, 36, 91, 0.25);
+        }
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #0a0d14 transparent;
+            display: block;
+            width: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-black text-slate-100 flex flex-col justify-between selection:bg-cyber-pink selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="relative z-10 glass-panel border-b border-cyber-border px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="code-font bg-cyber-card border border-cyber-pink/70 text-cyber-pink px-3.5 py-1.5 rounded-lg text-lg font-bold shadow-[0_0_15px_rgba(199,36,91,0.5)] flex items-center space-x-2">
+                <span class="animate-pulse">>_</span>
+                <span>ITÜK</span>
+            </div>
+            <!-- Click Counter Badge in Header -->
+            <div class="hidden md:flex items-center space-x-1.5 text-xs code-font bg-cyber-card border border-cyber-border px-3 py-1.5 rounded-lg text-slate-300">
+                <i class="fa-solid fa-fire text-cyber-pink"></i>
+                <span>Tux klikid: <strong id="header-click-count" class="text-cyber-pink">0</strong></span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleAudio()" id="audio-toggle" class="text-xs code-font bg-cyber-card hover:bg-slate-900 text-slate-300 px-3 py-2 rounded-lg border border-cyber-border flex items-center space-x-2 transition-all">
+                <i class="fa-solid fa-volume-high text-cyber-pink" id="audio-icon"></i>
+                <span class="hidden sm:inline">Heli: <span id="audio-status">Sees</span></span>
+            </button>
+            <button onclick="resetOde()" title="Alusta uuesti" class="text-xs code-font bg-cyber-card hover:bg-slate-900 text-slate-300 px-3 py-2 rounded-lg border border-cyber-border transition-all flex items-center space-x-1.5">
+                <i class="fa-solid fa-rotate-right text-cyber-pink"></i>
+                <span>Lähtesta</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="relative z-10 max-w-4xl mx-auto px-4 py-8 flex-1 flex flex-col items-center justify-center space-y-6 w-full">
+
+        <!-- Intro Banner -->
+        <div class="text-center space-y-2">
+            <div class="inline-flex items-center space-x-2 bg-cyber-pink/10 border border-cyber-pink/30 px-3.5 py-1 rounded-full text-xs font-mono text-cyber-pink shadow-[0_0_10px_rgba(199,36,91,0.2)]">
+                <span class="w-2 h-2 rounded-full bg-cyber-pink animate-ping"></span>
+                <span>Tux Clicker</span>
+            </div>
+            <h2 class="text-3xl lg:text-4xl font-extrabold tracking-tight">
+                Ood <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-pink via-rose-400 to-pink-300">ITÜKile</span>
+            </h2>
+        </div>
+
+        <!-- Tux Mascot & Clicker Area -->
+        <div class="w-full flex flex-col items-center space-y-5">
+            
+            <!-- Speech Bubble -->
+            <div class="speech-bubble w-full max-w-xl text-center min-h-[75px] flex flex-col items-center justify-center transition-all">
+                <div class="text-xs font-mono text-cyber-pink mb-1 uppercase tracking-wider" id="progress-indicator"></div>
+                <p id="tux-speech" class="text-sm sm:text-base code-font text-slate-200 font-medium tracking-wide">
+                    "Tux tux"
+                </p>
+            </div>
+
+            <!-- Mobile click count (shown only on small screens) -->
+            <div class="flex md:hidden items-center space-x-1.5 text-xs code-font bg-cyber-card border border-cyber-border px-3 py-1.5 rounded-lg text-slate-300">
+                <i class="fa-solid fa-fire text-cyber-pink"></i>
+                <span>Tux klikid: <strong id="mobile-click-count" class="text-cyber-pink">0</strong></span>
+            </div>
+
+            <!-- Animated Tux SVG Container -->
+            <div class="relative cursor-pointer group p-2 select-none" onclick="clickTux()" title="Klõpsa mind!">
+                <div class="absolute inset-0 bg-cyber-pink/15 rounded-full blur-2xl group-hover:bg-cyber-pink/30 transition-all duration-500"></div>
+                <svg id="tux-svg" class="w-40 h-40 lg:w-48 lg:h-48 relative z-10 animate-float" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Feet -->
+                    <ellipse cx="75" cy="200" rx="18" ry="9" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+                    <ellipse cx="125" cy="200" rx="18" ry="9" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+                    <!-- Flippers -->
+                    <ellipse cx="45" cy="120" rx="14" ry="35" fill="#0a0d14" transform="rotate(20 45 120)" stroke="#1a2233" stroke-width="2"/>
+                    <ellipse cx="155" cy="120" rx="14" ry="35" fill="#0a0d14" transform="rotate(-20 155 120)" stroke="#1a2233" stroke-width="2"/>
+                    <!-- Tux Body -->
+                    <ellipse cx="100" cy="130" rx="60" ry="70" fill="#0a0d14" stroke="#1a2233" stroke-width="3"/>
+                    <!-- Tux White Belly -->
+                    <ellipse cx="100" cy="135" rx="45" ry="55" fill="#f8fafc"/>
+                    <!-- Head -->
+                    <ellipse cx="100" cy="60" rx="42" ry="38" fill="#0a0d14" stroke="#1a2233" stroke-width="3"/>
+                    <!-- Eyes Background -->
+                    <ellipse cx="85" cy="55" rx="14" ry="16" fill="#f8fafc"/>
+                    <ellipse cx="115" cy="55" rx="14" ry="16" fill="#f8fafc"/>
+                    <!-- Pupils -->
+                    <circle cx="88" cy="55" r="6" fill="#000000" id="left-pupil"/>
+                    <circle cx="112" cy="55" r="6" fill="#000000" id="right-pupil"/>
+                    <!-- Beak -->
+                    <polygon points="100,62 85,75 115,75" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+                    <!-- ITÜK Magenta Cheeks -->
+                    <circle cx="73" cy="70" r="6" fill="#c7245b" opacity="0.9"/>
+                    <circle cx="127" cy="70" r="6" fill="#c7245b" opacity="0.9"/>
+                    <!-- ITÜK Logo Badge on Belly (>_) -->
+                    <text x="100" y="143" font-family="'JetBrains Mono', monospace" font-weight="700" font-size="28" fill="#c7245b" text-anchor="middle" dominant-baseline="middle">>_</text>
+                </svg>
+            </div>
+
+            <div class="text-xs font-mono text-slate-400 flex items-center space-x-2">
+                <i class="fa-solid fa-hand-pointer text-cyber-pink animate-bounce"></i>
+                <span>Klõpsa Tuxile, ja ta ütleb rea oodist!</span>
+            </div>
+        </div>
+
+        <!-- Accumulated Ode Display Scroll Box -->
+        <div class="w-full max-w-xl glass-panel rounded-2xl p-6 border border-cyber-border shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-cyber-border pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-cyber-pink animate-pulse"></span>
+                    <span class="text-xs font-mono text-slate-300 uppercase tracking-wider">Ood ITÜK-ile</span>
+                </div>
+                <span id="counter-badge" class="text-xs code-font bg-cyber-pink/20 text-cyber-pink px-2.5 py-0.5 rounded-full border border-cyber-pink/30">0 / 12</span>
+            </div>
+
+            <div id="poem-container" class="space-y-2 min-h-[180px] max-h-[260px] overflow-y-auto pr-2 code-font text-sm text-slate-300">
+                <p class="text-slate-600 italic text-center py-12" id="placeholder-text">... Klõpsa Tuxile!</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-cyber-border py-5 text-center text-xs text-slate-500 code-font bg-black">
+        <p class="mt-1 text-cyber-pink/80">>_</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- Audio Synthesizer SFX ---
+        let audioEnabled = true;
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const statusEl = document.getElementById('audio-status');
+            const iconEl = document.getElementById('audio-icon');
+            if (audioEnabled) {
+                statusEl.textContent = 'Sees';
+                iconEl.className = 'fa-solid fa-volume-high text-cyber-pink';
+            } else {
+                statusEl.textContent = 'Väljas';
+                iconEl.className = 'fa-solid fa-volume-xmark text-slate-500';
+            }
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(450, now);
+                osc.frequency.exponentialRampToValueAtTime(750, now + 0.1);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'complete') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);       // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.12); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.24); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.36); // C6
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+                osc.start(now);
+                osc.stop(now + 0.7);
+            }
+        }
+
+        // --- 12-Line Ode to ITÜK ---
+        const odeLines = [
+            "1. ITÜK, oled ülim organisatsioon,",
+            "2. sinuga parimad ülikoolihetked loon.",
+            "3. Kõigist teistest üle oled",
+            "4. paremat orgi kui sina pole.",
+            "5. Nädala tipp on neljapäev,",
+            "6. kui siseürri aeg on käes.",
+            "7. Imetlusväärne on su diivanite arv,",
+            "8. kus saab istuda terve tudengite parv.",
+            "9. ITÜK-is aga kõigile on ruumi,",
+            "10. et jagada jutte ülimalt kuumi",
+            "11. Sind, ITÜK, ei reeda ma iial,",
+            "12. seda luban sulle siiralt."
+        ];
+
+        let currentIndex = 0;
+        let totalClicks = 0; // Click counter variable
+
+        function clickTux() {
+            totalClicks++;
+            // Update click counter displays
+            document.getElementById('header-click-count').textContent = totalClicks;
+            document.getElementById('mobile-click-count').textContent = totalClicks;
+
+            if (currentIndex >= odeLines.length) {
+                playSound('click');
+                const speechEl = document.getElementById('tux-speech');
+                speechEl.textContent = `"Ood on valmis! Kokku oled mind klõpsanud juba ${totalClicks} korda! >_ "`;
+                return;
+            }
+
+            playSound('click');
+
+            // Remove placeholder if present
+            const placeholder = document.getElementById('placeholder-text');
+            if (placeholder) {
+                placeholder.remove();
+            }
+
+            const currentLine = odeLines[currentIndex];
+            
+            // Update speech bubble with current line
+            const speechEl = document.getElementById('tux-speech');
+            speechEl.textContent = `"${currentLine.replace(/^\d+\.\s*/, '')}"`;
+
+            // Append line to poem container
+            const poemContainer = document.getElementById('poem-container');
+            const p = document.createElement('p');
+            p.className = 'text-slate-200 py-1.5 px-3 bg-cyber-card/90 rounded-lg border border-cyber-border animate-fade-in flex items-center space-x-2';
+            p.innerHTML = `<span class="text-cyber-pink font-bold">></span> <span>${currentLine}</span>`;
+            poemContainer.appendChild(p);
+            poemContainer.scrollTop = poemContainer.scrollHeight;
+
+            currentIndex++;
+
+            // Update progress indicators
+            document.getElementById('progress-indicator').textContent = `Rida ${currentIndex} / ${odeLines.length}`;
+            document.getElementById('counter-badge').textContent = `${currentIndex} / ${odeLines.length}`;
+
+            // Animate Tux pupils randomly slightly
+            const leftPupil = document.getElementById('left-pupil');
+            const rightPupil = document.getElementById('right-pupil');
+            const offsetX = (Math.random() - 0.5) * 4;
+            const offsetY = (Math.random() - 0.5) * 4;
+            leftPupil.setAttribute('cx', 88 + offsetX);
+            leftPupil.setAttribute('cy', 55 + offsetY);
+            rightPupil.setAttribute('cx', 112 + offsetX);
+            rightPupil.setAttribute('cy', 55 + offsetY);
+
+            // Check if final 12th line is reached
+            if (currentIndex === odeLines.length) {
+                playSound('complete');
+            }
+        }
+
+        function resetOde() {
+            playSound('click');
+            currentIndex = 0;
+            totalClicks = 0; // Reset total clicks too
+            document.getElementById('header-click-count').textContent = totalClicks;
+            document.getElementById('mobile-click-count').textContent = totalClicks;
+
+            const poemContainer = document.getElementById('poem-container');
+            poemContainer.innerHTML = '<p class="text-slate-600 italic text-center py-12" id="placeholder-text">Ood ootab oma esimesi ridu... Klõpsa Tuxile!</p>';
+            document.getElementById('tux-speech').textContent = '"Alustame uuesti! Klõpsa mulle, et alustada oodi lugemist."';
+            document.getElementById('progress-indicator').textContent = 'Rida 0 / 12';
+            document.getElementById('counter-badge').textContent = '0 / 12';
+        }
+    </script>
+</body>
+</html>
